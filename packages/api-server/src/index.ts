@@ -1,4 +1,7 @@
-import { createEngine } from "@agentic-deployment/code-engine";
+import {
+  createEngine,
+  createEngineError,
+} from "@agentic-deployment/code-engine";
 import express from "express";
 
 export function startServer(port = 3000) {
@@ -11,13 +14,26 @@ export function startServer(port = 3000) {
 
   engine.register({
     name: "ping",
-    execute: () => ({ ok: true }),
+    execute: () => {
+      console.log("ping");
+      return { ok: true };
+    },
   });
 
   app.get("/api/ping", (_req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
 
-    const outcome = engine.execute("ping", {});
+    const registry = engine.getRegistry();
+    const firstEntry = registry[0];
+
+    if (!firstEntry) {
+      res
+        .status(500)
+        .json(createEngineError("PLUGIN_NOT_FOUND", "No plugins registered"));
+      return;
+    }
+
+    const outcome = engine.execute(firstEntry.name, {});
 
     if (!outcome.success) {
       res.status(500).json(outcome.error);

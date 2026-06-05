@@ -5,14 +5,20 @@ export type PluginRegistry = Map<string, Plugin>;
 export type Engine = {
   register(plugin: unknown): EngineError | null;
   getPlugin(name: string): Plugin | undefined;
+  getRegistry(): Plugin[];
   execute(
     name: string,
     args: unknown,
-  ): { success: true; result: unknown } | { success: false; error: EngineError };
+  ):
+    | { success: true; result: unknown }
+    | { success: false; error: EngineError };
 };
 
 export type EngineError = {
-  code: "PLUGIN_NOT_FOUND" | "PLUGIN_ALREADY_REGISTERED" | "PLUGIN_EXECUTION_FAILED";
+  code:
+    | "PLUGIN_NOT_FOUND"
+    | "PLUGIN_ALREADY_REGISTERED"
+    | "PLUGIN_EXECUTION_FAILED";
   message: string;
   pluginName?: string;
   cause?: unknown;
@@ -32,7 +38,10 @@ export function createEngineError(
 
 export function validatePlugin(plugin: unknown): EngineError | null {
   if (typeof plugin !== "object" || plugin === null) {
-    return createEngineError("PLUGIN_EXECUTION_FAILED", "Plugin must be an object");
+    return createEngineError(
+      "PLUGIN_EXECUTION_FAILED",
+      "Plugin must be an object",
+    );
   }
 
   const candidate = plugin as Record<string, unknown>;
@@ -83,11 +92,16 @@ export function createEngine(): Engine {
     getPlugin(name: string): Plugin | undefined {
       return registry.get(name);
     },
+    getRegistry(): Array<Plugin> {
+      return Array.from(registry.values());
+    },
 
     execute(
       name: string,
       args: unknown,
-    ): { success: true; result: unknown } | { success: false; error: EngineError } {
+    ):
+      | { success: true; result: unknown }
+      | { success: false; error: EngineError } {
       const plugin = registry.get(name);
 
       if (!plugin) {
