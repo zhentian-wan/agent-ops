@@ -104,4 +104,4 @@ pnpm build      # Ensure all packages compile
 - Prefer **TypeScript** over JavaScript for all new code.
 - Keep changes minimal and scoped — this is an early-stage project.
 - Do not commit `.env` files or generated `dist/` output.
-- `gitPlugin` clones repos into the process working directory; avoid committing cloned `repo-*` directories.
+- `gitPlugin` clones repos into the process working directory as `repo-*` folders; these are gitignored via `repo-*/` in `.gitignore`.
