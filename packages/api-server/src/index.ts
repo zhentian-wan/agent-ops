@@ -2,6 +2,7 @@ import {
   createEngine,
   createEngineError,
 } from "@agentic-deployment/code-engine";
+import { gitPlugin } from "@agentic-deployment/test-plugin";
 import express from "express";
 
 export function startServer(port = 3000) {
@@ -12,15 +13,9 @@ export function startServer(port = 3000) {
 
   const engine = createEngine();
 
-  engine.register({
-    name: "ping",
-    execute: () => {
-      console.log("ping");
-      return { ok: true };
-    },
-  });
+  engine.register(gitPlugin);
 
-  app.get("/api/ping", (_req, res) => {
+  app.post("/api/ping", async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
 
     const registry = engine.getRegistry();
@@ -33,7 +28,7 @@ export function startServer(port = 3000) {
       return;
     }
 
-    const outcome = engine.execute(firstEntry.name, {});
+    const outcome = await engine.execute(firstEntry.name, req.body);
 
     if (!outcome.success) {
       res.status(500).json(outcome.error);

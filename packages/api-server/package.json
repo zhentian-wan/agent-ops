@@ -4,15 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @agentic-deployment/code-engine run build",
+    "predev": "pnpm --filter @agentic-deployment/code-engine run build && pnpm --filter @agentic-deployment/test-plugin run build",
     "dev": "tsx src/index.ts",
-    "prestart": "pnpm run build && pnpm --filter @agentic-deployment/code-engine run build",
+    "prestart": "pnpm run build && pnpm --filter @agentic-deployment/code-engine run build && pnpm --filter @agentic-deployment/test-plugin run build",
     "start": "node dist/index.js",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@agentic-deployment/code-engine": "workspace:*",
+    "@agentic-deployment/test-plugin": "workspace:*",
     "express": "^4.21.2"
   },
   "devDependencies": {

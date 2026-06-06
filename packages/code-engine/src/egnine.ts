@@ -9,9 +9,10 @@ export type Engine = {
   execute(
     name: string,
     args: unknown,
-  ):
+  ): Promise<
     | { success: true; result: unknown }
-    | { success: false; error: EngineError };
+    | { success: false; error: EngineError }
+  >;
 };
 
 export type EngineError = {
@@ -96,12 +97,13 @@ export function createEngine(): Engine {
       return Array.from(registry.values());
     },
 
-    execute(
+    async execute(
       name: string,
       args: unknown,
-    ):
+    ): Promise<
       | { success: true; result: unknown }
-      | { success: false; error: EngineError } {
+      | { success: false; error: EngineError }
+    > {
       const plugin = registry.get(name);
 
       if (!plugin) {
@@ -116,7 +118,8 @@ export function createEngine(): Engine {
       }
 
       try {
-        return { success: true, result: plugin.execute(args) };
+        const result = await plugin.execute(args);
+        return { success: true, result };
       } catch (cause) {
         return {
           success: false,
