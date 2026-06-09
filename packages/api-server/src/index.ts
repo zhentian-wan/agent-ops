@@ -1,8 +1,6 @@
-import {
-  createEngine,
-  createEngineError,
-} from "@agentic-deployment/code-engine";
-import { gitPlugin } from "@agentic-deployment/test-plugin";
+import { createEngine } from "@agentic-deployment/code-engine";
+import { dockerPlugin } from "@agentic-deployment/docker-plugin";
+import { gitPlugin } from "@agentic-deployment/git-plugin";
 import express from "express";
 
 export function startServer(port = 3000) {
@@ -14,21 +12,12 @@ export function startServer(port = 3000) {
   const engine = createEngine();
 
   engine.register(gitPlugin);
+  engine.register(dockerPlugin);
 
   app.post("/api/ping", async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
 
-    const registry = engine.getRegistry();
-    const firstEntry = registry[0];
-
-    if (!firstEntry) {
-      res
-        .status(500)
-        .json(createEngineError("PLUGIN_NOT_FOUND", "No plugins registered"));
-      return;
-    }
-
-    const outcome = await engine.execute(firstEntry.name, req.body);
+    const outcome = await engine.execute("docker-plugin", req.body);
 
     if (!outcome.success) {
       res.status(500).json(outcome.error);

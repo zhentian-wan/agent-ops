@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-deployment/test-plugin",
+  "name": "@agentic-deployment/git-plugin",
   "version": "0.0.0",
   "private": true,
   "type": "module",

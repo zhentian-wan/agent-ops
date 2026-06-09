@@ -25,7 +25,7 @@ A pnpm monorepo that provides a plugin-based agentic execution platform: a plugi
 | `pnpm --filter <pkg> run build` | Build a single package |
 | `pnpm --filter <pkg> run typecheck` | Typecheck a single package |
 
-> **Build order matters.** `api-server` `predev`/`prestart` hooks build `code-engine` and `test-plugin` first.
+> **Build order matters.** `api-server` `predev`/`prestart` hooks build `code-engine` and `git-plugin` first.
 
 ## Directory Structure
 ```
@@ -36,7 +36,7 @@ agentic-deployment/
 │   ├── plugin-sdk/       # Minimal Plugin interface (shared contract)
 │   └── web-dashboard/    # React + Vite frontend
 ├── plugins/
-│   └── test-plugin/      # Example plugin (git-clone implementation)
+│   └── git-plugin/      # Example plugin (git-clone implementation)
 ├── tsconfig.json         # Root TS config (extended by all packages)
 └── pnpm-workspace.yaml   # Workspace: packages/*, plugins/*
 ```
@@ -46,7 +46,7 @@ agentic-deployment/
 - **`packages/code-engine/`** — `createEngine()` returns an `Engine` with `register`, `getPlugin`, `getRegistry`, and `execute`. Validates plugins on registration and wraps execution errors in typed `EngineError` objects.
 - **`packages/api-server/`** — Express server (default port 3000). `POST /api/ping` runs the first registered plugin with the request body as args. Currently hard-codes `gitPlugin`.
 - **`packages/web-dashboard/`** — Single-button React app that POSTs `{ repoUrl }` to the API. Configurable via `VITE_API_URL` and `VITE_REPO_URL` env vars.
-- **`plugins/test-plugin/`** — Implements `gitPlugin` (runs `git clone` via `execFileSync`) and a trivial `testPlugin` echo plugin.
+- **`plugins/git-plugin/`** — Implements `gitPlugin` (runs `git clone` via `execFileSync`) and a trivial `testPlugin` echo plugin.
 
 ## Architecture
 ```
@@ -56,7 +56,7 @@ web-dashboard  ──POST /api/ping──►  api-server
                                         │  register / execute
                                     plugin-sdk (Plugin interface)
                                         │
-                                    test-plugin (gitPlugin, testPlugin)
+                                    git-plugin (gitPlugin, testPlugin)
 ```
 Plugins are registered at server startup. The engine validates the plugin shape, stores it in a `Map`, and dispatches calls by name. Errors flow back as structured `EngineError` objects with a typed `code` field.
 
