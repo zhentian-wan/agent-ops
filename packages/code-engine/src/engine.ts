@@ -1,11 +1,16 @@
-import type { Plugin } from "@agentic-deployment/plugin-sdk";
+import type { EngineContext, Plugin } from "@agentic-deployment/plugin-sdk";
 
 export type PluginRegistry = Map<string, Plugin>;
+
+export type CreateEngineOptions = {
+  context: EngineContext;
+};
 
 export type Engine = {
   register(plugin: unknown): EngineError | null;
   getPlugin(name: string): Plugin | undefined;
   getRegistry(): Plugin[];
+  getContext(): EngineContext;
   execute(
     name: string,
     args: unknown,
@@ -65,8 +70,9 @@ export function validatePlugin(plugin: unknown): EngineError | null {
   return null;
 }
 
-export function createEngine(): Engine {
+export function createEngine(options: CreateEngineOptions): Engine {
   const registry: PluginRegistry = new Map();
+  const { context } = options;
 
   return {
     register(plugin: unknown): EngineError | null {
@@ -97,6 +103,10 @@ export function createEngine(): Engine {
       return Array.from(registry.values());
     },
 
+    getContext(): EngineContext {
+      return context;
+    },
+
     async execute(
       name: string,
       args: unknown,
@@ -118,7 +128,7 @@ export function createEngine(): Engine {
       }
 
       try {
-        const result = await plugin.execute(args);
+        const result = await plugin.execute(args, context);
         return { success: true, result };
       } catch (cause) {
         return {

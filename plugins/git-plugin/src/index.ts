@@ -4,8 +4,8 @@ import type { Plugin } from "@agentic-deployment/plugin-sdk";
 
 export const testPlugin: Plugin = {
   name: "test-plugin",
-  execute: (args) => ({
+  execute: (_args, _context) => ({
     plugin: "test-plugin",
-    args,
+    args: _args,
   }),
 };

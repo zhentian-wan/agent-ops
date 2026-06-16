@@ -1,10 +1,10 @@
 import { execFileSync } from "node:child_process";
 
-import type { Plugin } from "@agentic-deployment/plugin-sdk";
+import type { EngineContext, Plugin } from "@agentic-deployment/plugin-sdk";
 
-type GitCloneArgs = {
+type GitPluginArgs = {
   destination?: string;
-  repoUrl: string;
+  repoUrl?: string;
 };
 
 function runGitClone(
@@ -33,12 +33,13 @@ function runGitClone(
 
 export const gitPlugin: Plugin = {
   name: "git-plugin",
-  execute: async (args: GitCloneArgs) => {
-    const repoUrl = args?.repoUrl;
-    const destination = args?.destination ?? `repo-${Date.now()}`;
+  execute: async (args: GitPluginArgs, context: EngineContext) => {
+    const repoUrl = args?.repoUrl ?? context.git.repoUrl;
+    const destination =
+      args?.destination ?? context.git.destination ?? `repo-${Date.now()}`;
 
     if (!repoUrl || typeof repoUrl !== "string") {
-      throw new Error("repoUrl is required");
+      throw new Error("context.git.repoUrl is required");
     }
 
     const { stdout, stderr } = runGitClone(repoUrl, destination);

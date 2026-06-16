@@ -7,7 +7,8 @@
     "build": "pnpm -r run build",
     "typecheck": "pnpm -r run typecheck",
     "start:wd": "pnpm --filter @agentic-deployment/web-dashboard dev",
-    "start:as": "pnpm --filter @agentic-deployment/api-server dev"
+    "start:as": "pnpm --filter @agentic-deployment/api-server dev",
+    "start:aurora": "pnpm --filter @agentic-deployment/aurora-app dev"
   },
   "engines": {
     "node": ">=20"

@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { Plugin } from "@agentic-deployment/plugin-sdk";
+import type { EngineContext, Plugin } from "@agentic-deployment/plugin-sdk";
 
 const defaultBuildContext = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -83,7 +83,7 @@ function stopAndRemoveContainer(containerName: string): void {
 
 export const dockerPlugin: Plugin = {
   name: "docker-plugin",
-  execute: async (args: DockerPluginArgs) => {
+  execute: async (args: DockerPluginArgs, _context: EngineContext) => {
     const buildContext = args?.buildContext ?? defaultBuildContext;
     const dockerfile = args?.dockerfile ?? "Dockerfile";
     const imageTag = args?.imageTag ?? "demo-app:latest";
