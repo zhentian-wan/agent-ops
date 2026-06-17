@@ -7,6 +7,7 @@ type FlowListProps = {
   isLoading: boolean;
   onCreate: () => void;
   onDelete: (flow: DeploymentFlow) => void;
+  onEdit: (flow: DeploymentFlow) => void;
   onSelect: (flow: DeploymentFlow) => void;
 };
 
@@ -16,6 +17,7 @@ export function FlowList({
   isLoading,
   onCreate,
   onDelete,
+  onEdit,
   onSelect,
 }: FlowListProps) {
   return (
@@ -63,13 +65,22 @@ export function FlowList({
                   ))}
                 </div>
               </button>
-              <button
-                className="button button--ghost flow-card__delete"
-                onClick={() => onDelete(flow)}
-                type="button"
-              >
-                Delete
-              </button>
+              <div className="flow-card__footer">
+                <button
+                  className="button button--ghost"
+                  onClick={() => onEdit(flow)}
+                  type="button"
+                >
+                  Edit
+                </button>
+                <button
+                  className="button button--ghost flow-card__delete"
+                  onClick={() => onDelete(flow)}
+                  type="button"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

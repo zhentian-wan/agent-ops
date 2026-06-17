@@ -9,17 +9,18 @@ import {
 } from "./api/client.js";
 import { buildFlowPayload, FlowEditor } from "./components/FlowEditor.js";
 import { FlowList } from "./components/FlowList.js";
+import { FlowLogViewer } from "./components/FlowLogViewer.js";
 import type { DeploymentFlow, PluginInfo } from "./types/deployment-flow.js";
 
 import "./styles.css";
 
-type EditorMode = "create" | "edit" | null;
+type ViewMode = "create" | "edit" | "logs" | null;
 
 export function App() {
   const [flows, setFlows] = useState<DeploymentFlow[]>([]);
   const [plugins, setPlugins] = useState<PluginInfo[]>([]);
   const [activeFlowId, setActiveFlowId] = useState<string | null>(null);
-  const [editorMode, setEditorMode] = useState<EditorMode>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [bannerError, setBannerError] = useState<string | null>(null);
@@ -52,18 +53,29 @@ export function App() {
 
   function openCreateEditor() {
     setActiveFlowId(null);
-    setEditorMode("create");
+    setViewMode("create");
     setBannerError(null);
   }
 
   function openEditEditor(flow: DeploymentFlow) {
     setActiveFlowId(flow.id);
-    setEditorMode("edit");
+    setViewMode("edit");
+    setBannerError(null);
+  }
+
+  function openLogsViewer(flow: DeploymentFlow) {
+    setActiveFlowId(flow.id);
+    setViewMode("logs");
     setBannerError(null);
   }
 
   function closeEditor() {
-    setEditorMode(null);
+    if (activeFlow) {
+      setViewMode("logs");
+      return;
+    }
+
+    setViewMode(null);
   }
 
   async function handleSave(input: {
@@ -79,7 +91,7 @@ export function App() {
         steps: buildFlowPayload(input.steps),
       };
 
-      if (editorMode === "edit" && activeFlow) {
+      if (viewMode === "edit" && activeFlow) {
         const updated = await updateFlow(activeFlow.id, payload);
         setFlows((current) =>
           current.map((flow) => (flow.id === updated.id ? updated : flow)),
@@ -91,7 +103,7 @@ export function App() {
         setActiveFlowId(created.id);
       }
 
-      setEditorMode(null);
+      setViewMode("logs");
     } finally {
       setIsSaving(false);
     }
@@ -112,7 +124,7 @@ export function App() {
 
       if (activeFlowId === flow.id) {
         setActiveFlowId(null);
-        setEditorMode(null);
+        setViewMode(null);
       }
     } catch (error) {
       setBannerError(
@@ -129,7 +141,7 @@ export function App() {
           <h1>Flow control panel</h1>
         </div>
         <p className="app-header__copy">
-          Configure deployment pipelines and plugin step settings from one place.
+          Configure deployment pipelines, run flows, and inspect step-by-step logs.
         </p>
       </header>
 
@@ -142,24 +154,27 @@ export function App() {
           isLoading={isLoading}
           onCreate={openCreateEditor}
           onDelete={handleDelete}
-          onSelect={openEditEditor}
+          onEdit={openEditEditor}
+          onSelect={openLogsViewer}
         />
 
-        {editorMode ? (
+        {viewMode === "create" || viewMode === "edit" ? (
           <FlowEditor
-            editingFlow={editorMode === "edit" ? activeFlow : null}
+            editingFlow={viewMode === "edit" ? activeFlow : null}
             isSaving={isSaving}
             onCancel={closeEditor}
             onSave={handleSave}
             plugins={plugins}
           />
+        ) : viewMode === "logs" && activeFlow ? (
+          <FlowLogViewer flow={activeFlow} onEdit={() => openEditEditor(activeFlow)} />
         ) : (
           <section className="flow-placeholder">
-            <p className="eyebrow">Editor</p>
+            <p className="eyebrow">Logs</p>
             <h2>Select or create a flow</h2>
             <p className="muted">
-              Pick a pipeline from the list to edit its steps, or create a new flow
-              with Git and Docker configuration fields.
+              Pick a pipeline from the list to view its deployment logs, or create a new
+              flow with Git and Docker configuration fields.
             </p>
             <button className="button button--primary" onClick={openCreateEditor} type="button">
               New flow

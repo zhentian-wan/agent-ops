@@ -4,6 +4,7 @@ import type {
   PluginInfo,
   UpdateDeploymentFlowInput,
 } from "../types/deployment-flow.js";
+import type { DeploymentRun, RunLogsResponse } from "../types/deployment-run.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
@@ -76,4 +77,29 @@ export async function deleteFlow(id: string): Promise<DeploymentFlow> {
   });
   const payload = await readJson<{ flow: DeploymentFlow }>(response);
   return payload.flow;
+}
+
+export async function listRunsByFlowId(flowId: string): Promise<DeploymentRun[]> {
+  const response = await fetch(`${API_BASE}/flows/${flowId}/runs`);
+  const payload = await readJson<{ runs: DeploymentRun[] }>(response);
+  return payload.runs;
+}
+
+export async function getRun(runId: string): Promise<DeploymentRun> {
+  const response = await fetch(`${API_BASE}/runs/${runId}`);
+  const payload = await readJson<{ run: DeploymentRun }>(response);
+  return payload.run;
+}
+
+export async function getRunLogs(runId: string): Promise<RunLogsResponse> {
+  const response = await fetch(`${API_BASE}/runs/${runId}/logs`);
+  return readJson<RunLogsResponse>(response);
+}
+
+export async function runFlow(flowId: string): Promise<DeploymentRun> {
+  const response = await fetch(`${API_BASE}/flows/${flowId}/run`, {
+    method: "POST",
+  });
+  const payload = await readJson<{ run: DeploymentRun }>(response);
+  return payload.run;
 }
